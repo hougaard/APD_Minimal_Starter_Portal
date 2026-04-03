@@ -1,0 +1,398 @@
+{
+  "Table": "APD Action Hgd",
+  "No": 70310519,
+  "Records": [
+    {
+      "F1": {
+        "value": "APDSCRIPT"
+      },
+      "F2": {
+        "value": "APD Script"
+      },
+      "F10": {
+        "value": false
+      },
+      "F11": {
+        "value": false
+      },
+      "F12": {
+        "value": false
+      },
+      "F13": {
+        "value": false
+      },
+      "F20": {
+        "value": 0
+      },
+      "F21": {
+        "value": 0
+      },
+      "F22": {
+        "value": ""
+      },
+      "F40": {
+        "value": ""
+      },
+      "F51": {
+        "value": false
+      },
+      "F52": {
+        "value": false
+      },
+      "F53": {
+        "value": false
+      },
+      "F54": {
+        "value": false
+      },
+      "F55": {
+        "value": false
+      },
+      "F60": {
+        "value": 0
+      },
+      "F62": {
+        "value": false
+      },
+      "F70": {
+        "value": ""
+      },
+      "F100": {
+        "value": "apdscript.js"
+      },
+      "F200": {
+        "value": ""
+      },
+      "F201": {
+        "value": false
+      },
+      "F300": {
+        "value": false
+      },
+      "F301": {
+        "value": 0
+      },
+      "F302": {
+        "value": 0
+      },
+      "F303": {
+        "value": ""
+      },
+      "F400": {
+        "value": ""
+      },
+      "F401": {
+        "value": ""
+      },
+      "F500": {
+        "value": false
+      },
+      "F501": {
+        "value": ""
+      },
+      "F503": {
+        "value": false
+      },
+      "F61": {
+        "value": ""
+      },
+      "F502": {
+        "value": 0
+      }
+    },
+    {
+      "F1": {
+        "value": "LOGIN"
+      },
+      "F2": {
+        "value": "Login"
+      },
+      "F10": {
+        "value": false
+      },
+      "F11": {
+        "value": false
+      },
+      "F12": {
+        "value": true
+      },
+      "F13": {
+        "value": false
+      },
+      "F20": {
+        "value": 0
+      },
+      "F21": {
+        "value": 0
+      },
+      "F22": {
+        "value": ""
+      },
+      "F40": {
+        "value": ""
+      },
+      "F51": {
+        "value": false
+      },
+      "F52": {
+        "value": false
+      },
+      "F53": {
+        "value": false
+      },
+      "F54": {
+        "value": false
+      },
+      "F55": {
+        "value": false
+      },
+      "F60": {
+        "value": 0
+      },
+      "F62": {
+        "value": false
+      },
+      "F70": {
+        "value": ""
+      },
+      "F100": {
+        "value": "login"
+      },
+      "F200": {
+        "value": ""
+      },
+      "F201": {
+        "value": false
+      },
+      "F300": {
+        "value": false
+      },
+      "F301": {
+        "value": 0
+      },
+      "F302": {
+        "value": 0
+      },
+      "F303": {
+        "value": ""
+      },
+      "F400": {
+        "value": ""
+      },
+      "F401": {
+        "value": ""
+      },
+      "F500": {
+        "value": false
+      },
+      "F501": {
+        "value": ""
+      },
+      "F503": {
+        "value": false
+      },
+      "F61": {
+        "value": ""
+      },
+      "F502": {
+        "value": 0
+      }
+    },
+    {
+      "F1": {
+        "value": "LOGINCHECK"
+      },
+      "F2": {
+        "value": "Login Check"
+      },
+      "F10": {
+        "value": false
+      },
+      "F11": {
+        "value": true
+      },
+      "F12": {
+        "value": false
+      },
+      "F13": {
+        "value": false
+      },
+      "F20": {
+        "value": 3
+      },
+      "F21": {
+        "value": 0
+      },
+      "F22": {
+        "value": ""
+      },
+      "F40": {
+        "value": ""
+      },
+      "F51": {
+        "value": false
+      },
+      "F52": {
+        "value": false
+      },
+      "F53": {
+        "value": false
+      },
+      "F54": {
+        "value": false
+      },
+      "F55": {
+        "value": false
+      },
+      "F60": {
+        "value": 0
+      },
+      "F62": {
+        "value": false
+      },
+      "F70": {
+        "value": ""
+      },
+      "F100": {
+        "value": ""
+      },
+      "F200": {
+        "value": ""
+      },
+      "F201": {
+        "value": false
+      },
+      "F300": {
+        "value": false
+      },
+      "F301": {
+        "value": 0
+      },
+      "F302": {
+        "value": 0
+      },
+      "F303": {
+        "value": ""
+      },
+      "F400": {
+        "value": "YmVnaW4KICAgIC8vIFRoaXMgd29ya3MgaWYgdGhpcyBhY3Rpb25zIGhhcyAiUmVxdWlyZSBBdXRoZW50aWNhdGlvbiIgYW5kIHRoZSBjb2RlIHdpbGwKICAgIC8vIG9ubHkgcnVuIGlmIGF1dGhlbnRpY2F0ZWQuCiAgICBvdXRwdXQoJ09LIScpOwogICAgcmVzcG9uc2UoJ2h0bWwnLCcnLCcnKTsKZW5kOwA="
+      },
+      "F401": {
+        "value": "eyJfVHlwZSI6IkNvbXBpbGF0aW9uVW5pdFN5bnRheCIsIktpbmQiOjgwLCJNZW1iZXJzIjpbeyJfVHlwZSI6Ikdsb2JhbFN0YXRlbWVudFN5bnRheCIsIktpbmQiOjMwMSwiU3RhdGVtZW50Ijp7Il9UeXBlIjoiQmxvY2tTdGF0ZW1lbnRTeW50YXgiLCJLaW5kIjozMDQsIkJlZ2luVG9rZW4iOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxLCJMaW5lTm8iOjIsIlZhbHVlIjpudWxsLCJUZXh0IjoiYmVnaW4iLCJLaW5kIjoxMTd9LCJTdGF0ZW1lbnRzIjpbeyJfVHlwZSI6IkV4cHJlc3Npb25TdGF0ZW1lbnRTeW50YXgiLCJLaW5kIjozMDIsIkV4cHJlc3Npb24iOnsiX1R5cGUiOiJDYWxsRXhwcmVzc2lvblN5bnRheCIsIktpbmQiOjIwNCwiSWRlbnRpZmllciI6eyJfVHlwZSI6IlN5bnRheFRva2VuIiwiUG9zaXRpb24iOjEyNiwiTGluZU5vIjo0LCJWYWx1ZSI6bnVsbCwiVGV4dCI6Im91dHB1dCIsIktpbmQiOjQ0fSwiRG90dGVkIjpmYWxzZSwiVHlwZSI6MCwiT3BlblBhcmVudGhlc2lzVG9rZW4iOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxMzIsIkxpbmVObyI6NCwiVmFsdWUiOm51bGwsIlRleHQiOiIoIiwiS2luZCI6N30sIkFyZ3VtZW50cyI6W3siX1R5cGUiOiJMaXRlcmFsRXhwcmVzc2lvblN5bnRheCIsIktpbmQiOjIwMywiVHlwZSI6MywiTGl0ZXJhbFRva2VuIjp7Il9UeXBlIjoiU3ludGF4VG9rZW4iLCJQb3NpdGlvbiI6MTMzLCJMaW5lTm8iOjQsIlZhbHVlIjoiT0shIiwiVGV4dCI6IidvayEnIiwiS2luZCI6NDZ9fV0sIkNsb3NlUGFyZW50aGVzaXNUb2tlbiI6eyJfVHlwZSI6IlN5bnRheFRva2VuIiwiUG9zaXRpb24iOjEzOCwiTGluZU5vIjo0LCJWYWx1ZSI6bnVsbCwiVGV4dCI6IikiLCJLaW5kIjo4fX19LHsiX1R5cGUiOiJFeHByZXNzaW9uU3RhdGVtZW50U3ludGF4IiwiS2luZCI6MzAyLCJFeHByZXNzaW9uIjp7Il9UeXBlIjoiQ2FsbEV4cHJlc3Npb25TeW50YXgiLCJLaW5kIjoyMDQsIklkZW50aWZpZXIiOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxNDUsIkxpbmVObyI6NSwiVmFsdWUiOm51bGwsIlRleHQiOiJyZXNwb25zZSIsIktpbmQiOjQ0fSwiRG90dGVkIjpmYWxzZSwiVHlwZSI6MCwiT3BlblBhcmVudGhlc2lzVG9rZW4iOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxNTMsIkxpbmVObyI6NSwiVmFsdWUiOm51bGwsIlRleHQiOiIoIiwiS2luZCI6N30sIkFyZ3VtZW50cyI6W3siX1R5cGUiOiJMaXRlcmFsRXhwcmVzc2lvblN5bnRheCIsIktpbmQiOjIwMywiVHlwZSI6MywiTGl0ZXJhbFRva2VuIjp7Il9UeXBlIjoiU3ludGF4VG9rZW4iLCJQb3NpdGlvbiI6MTU0LCJMaW5lTm8iOjUsIlZhbHVlIjoiaHRtbCIsIlRleHQiOiInaHRtbCciLCJLaW5kIjo0Nn19LHsiX1R5cGUiOiJMaXRlcmFsRXhwcmVzc2lvblN5bnRheCIsIktpbmQiOjIwMywiVHlwZSI6MywiTGl0ZXJhbFRva2VuIjp7Il9UeXBlIjoiU3ludGF4VG9rZW4iLCJQb3NpdGlvbiI6MTYxLCJMaW5lTm8iOjUsIlZhbHVlIjoiIiwiVGV4dCI6IicnIiwiS2luZCI6NDZ9fSx7Il9UeXBlIjoiTGl0ZXJhbEV4cHJlc3Npb25TeW50YXgiLCJLaW5kIjoyMDMsIlR5cGUiOjMsIkxpdGVyYWxUb2tlbiI6eyJfVHlwZSI6IlN5bnRheFRva2VuIiwiUG9zaXRpb24iOjE2NCwiTGluZU5vIjo1LCJWYWx1ZSI6IiIsIlRleHQiOiInJyIsIktpbmQiOjQ2fX1dLCJDbG9zZVBhcmVudGhlc2lzVG9rZW4iOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxNjYsIkxpbmVObyI6NSwiVmFsdWUiOm51bGwsIlRleHQiOiIpIiwiS2luZCI6OH19fV0sIkVuZFRva2VuIjp7Il9UeXBlIjoiU3ludGF4VG9rZW4iLCJQb3NpdGlvbiI6MTY5LCJMaW5lTm8iOjYsIlZhbHVlIjpudWxsLCJUZXh0IjoiZW5kIiwiS2luZCI6MTE4fX19XSwiRW5kT2ZGaWxlVG9rZW4iOnsiX1R5cGUiOiJTeW50YXhUb2tlbiIsIlBvc2l0aW9uIjoxNzMsIkxpbmVObyI6NiwiVmFsdWUiOm51bGwsIlRleHQiOiIiLCJLaW5kIjo5fX0A"
+      },
+      "F500": {
+        "value": false
+      },
+      "F501": {
+        "value": ""
+      },
+      "F503": {
+        "value": false
+      },
+      "F61": {
+        "value": ""
+      },
+      "F502": {
+        "value": 0
+      }
+    },
+    {
+      "F1": {
+        "value": "WELCOME"
+      },
+      "F2": {
+        "value": "Welcome Landing Page"
+      },
+      "F10": {
+        "value": true
+      },
+      "F11": {
+        "value": false
+      },
+      "F12": {
+        "value": false
+      },
+      "F13": {
+        "value": false
+      },
+      "F20": {
+        "value": 0
+      },
+      "F21": {
+        "value": 0
+      },
+      "F22": {
+        "value": ""
+      },
+      "F40": {
+        "value": ""
+      },
+      "F51": {
+        "value": false
+      },
+      "F52": {
+        "value": false
+      },
+      "F53": {
+        "value": false
+      },
+      "F54": {
+        "value": false
+      },
+      "F55": {
+        "value": false
+      },
+      "F60": {
+        "value": 0
+      },
+      "F62": {
+        "value": false
+      },
+      "F70": {
+        "value": ""
+      },
+      "F100": {
+        "value": "welcome"
+      },
+      "F200": {
+        "value": ""
+      },
+      "F201": {
+        "value": false
+      },
+      "F300": {
+        "value": false
+      },
+      "F301": {
+        "value": 0
+      },
+      "F302": {
+        "value": 0
+      },
+      "F303": {
+        "value": ""
+      },
+      "F400": {
+        "value": ""
+      },
+      "F401": {
+        "value": ""
+      },
+      "F500": {
+        "value": false
+      },
+      "F501": {
+        "value": ""
+      },
+      "F503": {
+        "value": false
+      },
+      "F61": {
+        "value": ""
+      },
+      "F502": {
+        "value": 0
+      }
+    }
+  ]
+}
