@@ -52,13 +52,111 @@
         "value": 0
       },
       "F62": {
-        "value": false
+        "value": true
       },
       "F70": {
         "value": ""
       },
       "F100": {
         "value": "apdscript.js"
+      },
+      "F200": {
+        "value": ""
+      },
+      "F201": {
+        "value": false
+      },
+      "F300": {
+        "value": false
+      },
+      "F301": {
+        "value": 0
+      },
+      "F302": {
+        "value": 0
+      },
+      "F303": {
+        "value": ""
+      },
+      "F400": {
+        "value": ""
+      },
+      "F401": {
+        "value": ""
+      },
+      "F500": {
+        "value": false
+      },
+      "F501": {
+        "value": ""
+      },
+      "F503": {
+        "value": false
+      },
+      "F61": {
+        "value": ""
+      },
+      "F502": {
+        "value": 0
+      }
+    },
+    {
+      "F1": {
+        "value": "CSS"
+      },
+      "F2": {
+        "value": "Shared CSS Stylesheet"
+      },
+      "F10": {
+        "value": false
+      },
+      "F11": {
+        "value": false
+      },
+      "F12": {
+        "value": false
+      },
+      "F13": {
+        "value": false
+      },
+      "F20": {
+        "value": 0
+      },
+      "F21": {
+        "value": 0
+      },
+      "F22": {
+        "value": ""
+      },
+      "F40": {
+        "value": ""
+      },
+      "F51": {
+        "value": false
+      },
+      "F52": {
+        "value": false
+      },
+      "F53": {
+        "value": false
+      },
+      "F54": {
+        "value": false
+      },
+      "F55": {
+        "value": false
+      },
+      "F60": {
+        "value": 0
+      },
+      "F62": {
+        "value": true
+      },
+      "F70": {
+        "value": ""
+      },
+      "F100": {
+        "value": "portal.css"
       },
       "F200": {
         "value": ""

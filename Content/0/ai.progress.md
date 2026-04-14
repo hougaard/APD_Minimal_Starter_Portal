@@ -26,13 +26,47 @@ Also updated:
 - New matching icons: grid/dashboard, database/cylinder, chat bubble, shield-check
 - Compiled LOGIN action
 
+### Session 3 - Extracted CSS into shared action
+
+Created a centralized CSS action (`CSS`) so styles are no longer embedded inline in each page:
+
+**New action created:**
+- `CSS` (type: file) — uses template `portal.css`, serves shared stylesheet with `<?mimetype('text/css')?>` 
+
+**Template `portal.css` contains all styles organized in sections:**
+- Shared Foundation (reset, variables, body, animated background)
+- Header (logo, badges)
+- Buttons (primary, secondary)
+- Hero badge / welcome badge (shared pulse dot badge, gradient text)
+- Footer
+- Animations (fadeInUp, spin, pulse)
+- Welcome Page Styles (hero, features grid, feature cards, divider, steps)
+- Login Page Styles (login grid, welcome section, feature list, login card, form fields, error message, contact info) — scoped under `body.login-page` for flex layout
+- Responsive breakpoints
+
+**Updated templates:**
+- `welcome.html` — replaced `<style>` block with `<link rel="stylesheet" href="<?action('CSS')?>">`
+- `login.html` — replaced `<style>` block with `<link rel="stylesheet" href="<?action('CSS')?>">`, added `class="login-page"` to `<body>` tag for page-specific flex layout
+
+**Compiled all actions.**
+
+### Session 4 - Added APDSCRIPT link to both pages
+
+Added `<script src="<?action('APDSCRIPT')?>"></script>` to the `<head>` section of both templates:
+- `welcome.html` — added after the CSS link
+- `login.html` — added after the CSS link, before Company Information table tags
+
+Compiled all actions.
+
 ### Existing Actions:
-- `APDSCRIPT` - APD Script (type 0)
+- `APDSCRIPT` - APD Script (type 0) - uses `apdscript.js` template
+- `CSS` - Shared CSS Stylesheet (type file) - uses `portal.css` template
 - `LOGIN` - Login (type 0) - uses `login.html` template
 - `LOGINCHECK` - Login Check (type 3 / script)
 - `WELCOME` - Welcome Landing Page (type 0) - uses `welcome.html` template
 
 ### Templates:
 - `apdscript.js` - JavaScript library
-- `login.html` - Login page (redesigned)
-- `welcome.html` - Welcome/landing page
+- `login.html` - Login page (uses external CSS + APDSCRIPT)
+- `portal.css` - Shared CSS stylesheet
+- `welcome.html` - Welcome/landing page (uses external CSS + APDSCRIPT)
