@@ -1,852 +1,545 @@
-// Advanced Portal Designer - Ajax Support 
-// (c) hougaard.com 2024
-// 3.0.0.41
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Portal Designer</title>
+    <script src="<?action('APDSCRIPT')?></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-var RootLocation = '<?apd?>';
-
-var requests = new Array();
-var errorCode = 0;
-//FN
-var globalField_d;
-if(typeof(XMLHttpRequest) == 'undefined')
-	var XMLHttpRequest = function()
-	{
-		var request = null;
-		try
-		{
-			request = new ActiveXObject('Msxml2.XMLHTTP');
-		}
-		catch(e)
-		{
-			try
-			{
-				request = new ActiveXObject('Microsoft.XMLHTTP');
-			}
-			catch(ee)
-			{}
-		}
-		return request;
-	}
-
-function ajax_stop()
-{
-	for(var i=0; i<requests.length; i++)
-	{
-		if(requests[i] != null)
-			requests[i].abort();
-	}
-}
-
-function ajax_create_request(context)
-{
-	for(var i=0; i<requests.length; i++)
-	{
-		if(requests[i].readyState == 4)
-		{
-			requests[i].abort();
-			requests[i].context = null;
-			return requests[i];
-		}
-	}
-
-	var pos = requests.length;
-	
-	requests[pos] = Object();
-	requests[pos].obj = new XMLHttpRequest();
-	requests[pos].context = context;
-	
-	return requests[pos];
-}
-
-function ajax_request(url, data, callback, context)
-{
-	var request = ajax_create_request(context);
-	var async = typeof(callback) == 'function';
-	if(async) request.obj.onreadystatechange = function()
-	{
-		if(request.obj.readyState == 4)
-			callback(new ajax_response(request));
-	}
-	request.obj.open('POST', url, async);
-	request.obj.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-	request.obj.send(data);
-	if(!async)
-		return new ajax_response(request);
-}
-
-function ajax_response(request)
-{
-	this.request = request.obj;
-	this.error = null;
-	this.value = null;
-	this.context = request.context;
-	if(request.obj.status == 200)
-	{
-		try
-		{
-			this.value = request.obj.responseText;
-				
-			if(this.value && this.value.error)
-			{
-				this.error = this.value.error;
-				this.value = null;
-			}
-		}
-		catch(e)
-		{
-			this.error = new ajax_error('??' + e.name, e.description, e.number);
-		}
-	}
-	else
-	{
-		this.error = new ajax_error('HTTP request failed with status: ' + request.obj.status, request.obj.status);
-	}
-	
-	return this;
-}
-
-function enc(s)
-{
-	return s.toString().replace(/\%/g, "%26").replace(/=/g, "%3D");
-}
-
-function ajax_error(name, description, number)
-{
-	this.name = name;
-	this.description = description;
-	this.number = number;
-
-	return this;
-}
-
-function FallbackAPDAlert(message)
-{
-	try
-	{
-		// Uge a nice dialog if its present, otherwise, fallback to plain old javascript alert
-	    var dialog = document.querySelector('#errordialog');
-	    if (! dialog.showModal) 
-	    {
-	      dialogPolyfill.registerDialog(dialog);
-	    }
-	    var msgtxt = dialog.querySelector('#ErrorMessageText');
-	    msgtxt.innerHTML = message;
-	    dialog.querySelector('button:not([disabled])').addEventListener('click', function() {
-	      dialog.close();
-	    });
-
-	   dialog.showModal();
-
-	}
-	catch(err)
-	{
-		alert(message);
-	}
-}
-
-APDAlert = FallbackAPDAlert;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Navision Support
-
-function APD_GetAction(action,parms) // TODO
-{
-	Rsp = ajax_request(RootLocation + '?action='+action+'&'+parms+'&'+encodeURI(window.location.search.substring(1)),'',true,null);
-	return Rsp.value;
-	/*
-    if (Rsp.value.slice(0,5) == 'HTML ')
-    {
-		return new String(Rsp.value.slice(5));
-    }
-    */
-}
-
-function APD_Empty(form)
-{
-}
-
-var xRecValue;
-
-// Can by assigned by a page to be executed after a successfull validate command ......
-var ExtraValidateFunction = APD_Empty;
-
-function APD_GetValue(form,d)
-{
-	switch(form.elements[d].type.toString())
-	{
-		case "checkbox":
-			return form.elements[d].checked.toString();
-			break;
-		case "select-one":
-			if (form.elements[d].selectedIndex < 0)			
-				return '';
-			return form.elements[d].options[form.elements[d].selectedIndex].value;						
-			break;
-		default:
-            if (form.elements[d].value.toString().length > 2048)
-                return form.elements[d].value.toString().slice(0,2048);
-            else
-			    return form.elements[d].value.toString();
-			break;
-	}
-}
-
-function APD_SetValue(form,d,v)
-{	
-	switch(form.elements[d].type.toString())
-	{
-		case "checkbox":
-			if (v == '1')
-				form.elements[d].checked = true;
-			else
-				form.elements[d].checked = false;
-			break;
-		case "select-one":
-		    if (typeof(v) == 'int')
-				  form.elements[d].selectedIndex = parseInt(v);
-		    else
-		    {			
-			for(i = 0; i < form.elements[d].options.length;i++)
-			{				
-				if (v == form.elements[d].options[i].value)
-				{
-					form.elements[d].selectedIndex = form.elements[d].options[i].index;
-					return;
-				}
-			}
-		    }
-		break;
-	        default:
-			form.elements[d].value = v;
-			break;
-	}
-}
-
-function APD_GetSingleValue(Table,Field)
-{
-	var i,d;
-	var SearchName = Table.toString()+':'+Field.toString();
-	for (i = 0; i < document.forms.length; i++)
-		for (d = 0; d < document.forms[i].length; d++)
-			if (document.forms[i].elements[d].name != null)
-				if (document.forms[i].elements[d].name == SearchName)
-					return APD_GetValue(document.forms[i],d);
-				
-	return null;
-}
-
-function APD_Refresh(table,InputForm)
-{
-	ViewString = 'undefined';
-	step = '=';
-	var data = "";
-	var d;    
-    var Rsp;
-	var FirstField = true;
-	//document.body.style.cursor = "wait";
-    for (d = 0; d < InputForm.length; d++)
-    {
-		var CheckTablePos = InputForm.elements[d].name.indexOf(":");
-		var CheckTable = "";
-		if ( CheckTable != -1)
-		{
-			CheckTable = InputForm.elements[d].name.slice(0,CheckTablePos);
-			if (CheckTable == table.toString()) 
-			{
-				if (!FirstField)
-					data = data + '&';
-				data = data + InputForm.elements[d].name + '=' + encodeURIComponent(APD_GetValue(InputForm,d));
-				FirstField = false;
-			}
-		}
-	}
-	Rsp = ajax_request(RootLocation + '?ajax=find&Table='+table+'&Step='+encodeURIComponent(step)+'&View='+encodeURIComponent(ViewString)+'&'+encodeURI(window.location.search.substring(1)),data,true,null);
-    if (Rsp.value.slice(0,5) == 'DATA1')
-    {
-        // The Record comes back
-        bg = new String(Rsp.value.slice(5));
-        split = bg.split("&");
-        getvar = new Object();
-        for(i= 0; i < split.length; i++)
-        {
-            bg = new String(split[i]);
-            vaerdi = bg.split("=");
-            getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        for (d = 0; d < InputForm.length; d++)
-		{
-			var CheckTablePos = InputForm.elements[d].name.indexOf(":");
-			var CheckTable = "";
-			if ( CheckTable != -1)
-			{
-				CheckTable = InputForm.elements[d].name.slice(0,CheckTablePos);
-				if (CheckTable == table.toString()) 
-					APD_SetValue(InputForm,d,getvar[InputForm.elements[d].name]);
-			}
-		}
-		document.body.style.cursor = "default";
-		return true;
-    }
-    else
-        if (Rsp.value.slice(0,5) == 'ERROR')
-           APDAlert(Rsp.value.slice(5));
-        else
-            if (Rsp.value.slice(0,5) == 'EMPTY')
-            {
-            	document.body.style.cursor = "default";
-				return false;
+
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --accent: #06b6d4;
+            --accent-light: #22d3ee;
+            --surface: #0f172a;
+            --surface-light: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --glow: rgba(99, 102, 241, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            animation: floatGlow 20s ease-in-out infinite;
+        }
+
+        .bg-glow-1 {
+            background: var(--primary);
+            top: -200px;
+            right: -100px;
+        }
+
+        .bg-glow-2 {
+            background: var(--accent);
+            bottom: -200px;
+            left: -100px;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, 30px) scale(0.9); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 24px var(--glow);
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .badge-bc {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: var(--accent-light);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary-light);
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 68px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.08;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 19px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            max-width: 620px;
+            margin: 0 auto 48px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 24px var(--glow), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--glow), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .btn-secondary:hover {
+            background: #263349;
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Features */
+        .features {
+            padding: 40px 0 80px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(30, 41, 59, 0.3));
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.4s; }
+        .feature-card:nth-child(2) { animation-delay: 0.5s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .feature-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .feature-icon.purple {
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .feature-icon.cyan {
+            background: rgba(6, 182, 212, 0.15);
+        }
+
+        .feature-icon.rose {
+            background: rgba(244, 63, 94, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-muted);
+        }
+
+        /* Divider graphic */
+        .divider {
+            text-align: center;
+            padding: 20px 0 60px;
+            animation: fadeInUp 0.6s ease-out 0.7s both;
+        }
+
+        .divider-line {
+            width: 80px;
+            height: 3px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 0 auto 40px;
+        }
+
+        .divider h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .divider p {
+            font-size: 15px;
+            color: var(--text-muted);
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Steps */
+        .steps {
+            padding: 0 0 80px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            counter-reset: steps;
+        }
+
+        .step {
+            text-align: center;
+            counter-increment: steps;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .step:nth-child(1) { animation-delay: 0.8s; }
+        .step:nth-child(2) { animation-delay: 0.9s; }
+        .step:nth-child(3) { animation-delay: 1.0s; }
+        .step:nth-child(4) { animation-delay: 1.1s; }
+
+        .step-number {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .step-number::before {
+            content: counter(steps);
+        }
+
+        .step h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .step p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 32px 0;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
             }
-			else
-				APDAlert('Unknown Navision Ajax response (#2) ('+Rsp.value+')');
-	document.body.style.cursor = "default";
-}
-
-function APD_validate(entry,table,field)
-{
-  	errorCode = 0;
-	var data = "";
-	var i,d;    
-	var Rsp;
-	var form = entry.form;
-	var Message = 0;
-	var field_d;
-	var xxRecValue;
-	if (xRecValue != null)
-		xxRecValue = xRecValue;
-	//document.body.style.cursor = "wait";
-	for (d = 0; d < form.length; d++)
-	{
-		if (form.elements[d].name != null)
-		{
-			if (form.elements[d].name.slice(0,table.toString().length + 1) == table.toString()+':')
-			{
-				if (d > 0)
-						data = data + '&';
-				data = data + form.elements[d].name + '=' + encodeURIComponent(APD_GetValue(form,d));
-				if (form.elements[d].name == table.toString()+':'+field.toString())
-				field_d = d;
-			}
-		}
-	}
-    if (typeof(globalField_d != undefined) && (globalField_d != null))
-      globalField_d = table.toString()+':'+field.toString(); 
- 
-	Rsp = ajax_request(RootLocation + '?ajax=validate&Table='+table+'&Field='+field+'&'+encodeURI(window.location.search.substring(1)),data,true,null);
-	if (Rsp.value.slice(0,5) == 'DATA1')
-    {
-        // The Record comes back
-        bg = new String(Rsp.value.slice(5));
-        split = bg.split("&");
-        getvar = new Object();
-        for(i= 0; i < split.length; i++)
-        {
-            bg = new String(split[i]);
-            vaerdi = bg.split("=");
-            getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
-            if (vaerdi[0] == "_MESSAGE")
-                Message = 1;
-        }
-			for (d = 0; d < form.length; d++)
-			{
-				if (form.elements[d].name != null)
-				{
-				if (typeof(getvar[form.elements[d].name]) != 'undefined')
-					APD_SetValue(form,d,getvar[form.elements[d].name]);
-					if (Message == 1)
-					{
-						var msg = getvar["_MESSAGE"];
-						msg = msg.replace(/\x2B/g," ");
-						msg = msg.replace(/\\/g,"\n");
-						msg = msg.replace(/%2c/g,","); 
-						APDAlert(msg);
-					}
-				}
-			}
-			ExtraValidateFunction(form);
-    }
-    else
-        if (Rsp.value.slice(0,5) == 'ERROR')
-        {
-		errorCode = 1;
-		APDAlert(Rsp.value.slice(5));
-		if(xxRecValue != null)
-		{
-			APD_SetValue(form,field_d,xxRecValue.toString());
-			if(form.elements[field_d].type.toString() == "text")
-				form.elements[field_d].focus();
-		}
-		document.body.style.cursor = "default";
-		return;
-        }
-        else
-        {
-		errorCode = 1;
-		APDAlert('Communication error, try again.');
-		if(xxRecValue != null) 
-		{
-			APD_SetValue(form,field_d,xxRecValue.toString());
-			if(form.elements[field_d].type.toString() == "text")
-				form.elements[field_d].focus();
-		}
-		document.body.style.cursor = "default";
-		return;
-        }            
-}
-
-function APD_Find(table,step,ViewString,InputForm,OutputForm)
-{
-	var data = "";
-	var i,d;    
-    var Rsp;
-	var FirstField = true;
-	//document.body.style.cursor = "wait";
-	for (i = 0; i < document.forms.length; i++)
-	{
-        for (d = 0; d < document.forms[i].length; d++)
-        {
-			var CheckTablePos = document.forms[i].elements[d].name.indexOf(":");
-			var CheckTable = "";
-			if ( CheckTable != -1)
-			{
-				CheckTable = document.forms[i].elements[d].name.slice(0,CheckTablePos);
-				if (CheckTable == table.toString()) 
-				{
-					if (OutputForm)
-					{
-						if (document.forms[i].name == InputForm)
-						{
-							if (!FirstField)
-								data = data + '&';
-							data = data + document.forms[i].elements[d].name + '=' + encodeURIComponent(APD_GetValue(document.forms[i],d));
-							FirstField = false;
-						}
-					}
-					else
-					{
-						if (!FirstField)
-							data = data + '&';
-						data = data + document.forms[i].elements[d].name + '=' + encodeURIComponent(APD_GetValue(document.forms[i],d));
-						FirstField = false;
-					}
-				}
-			}
-        }
-	}
-	Rsp = ajax_request(RootLocation + '?ajax=find&Table='+table+'&Step='+encodeURIComponent(step)+'&View='+encodeURIComponent(ViewString)+'&'+encodeURI(window.location.search.substring(1)),data,true,null);
-    if (Rsp.value.slice(0,5) == 'DATA1')
-    {
-        // The Record comes back
-        bg = new String(Rsp.value.slice(5));
-        split = bg.split("&");
-        getvar = new Object();
-        for(i= 0; i < split.length; i++)
-        {
-            bg = new String(split[i]);
-            vaerdi = bg.split("=");
-            getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
-        }
-    	for (i = 0; i < document.forms.length; i++)
-            for (d = 0; d < document.forms[i].length; d++)
-			{
-				var CheckTablePos = document.forms[i].elements[d].name.indexOf(":");
-				var CheckTable = "";
-				if ( CheckTable != -1)
-				{
-					if (OutputForm)
-					{
-						if (document.forms[i].name == OutputForm)
-						{
-							CheckTable = document.forms[i].elements[d].name.slice(0,CheckTablePos);
-							if (CheckTable == table.toString()) 
-								APD_SetValue(document.forms[i],d,getvar[document.forms[i].elements[d].name]);
-						}
-					}
-					else
-					{
-						CheckTable = document.forms[i].elements[d].name.slice(0,CheckTablePos);
-						if (CheckTable == table.toString()) 
-							APD_SetValue(document.forms[i],d,getvar[document.forms[i].elements[d].name]);
-					}
-				}
-			}
-		document.body.style.cursor = "default";
-		return true;
-    }
-    else
-        if (Rsp.value.slice(0,5) == 'ERROR')
-           APDAlert(Rsp.value.slice(5));
-        else
-            if (Rsp.value.slice(0,5) == 'EMPTY')
-            {
-            	document.body.style.cursor = "default";
-				return false;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-			else
-				APDAlert('Unknown NAV Ajax response (#2) ('+Rsp.value+')');
-	document.body.style.cursor = "default";
-}
-
-function APD_Focus(entry,table,field)
-{
-  var i,d;
-	if (entry != null) 
-	{
-		if (entry.form != null)
-		{
-			var form = entry.form;
-			for (d = 0; d < form.length; d++)
-			{
-				if (form.elements[d].name != null)
-				{		
-					if (form.elements[d].name == table.toString()+':'+field.toString())
-						xRecValue = APD_GetValue(form,d);
-				}
-			}
-		}
-	}
-}
-
-function APD_CreateViewString(ParentTableNo,ViewString)
-{
-	// 
-	var NewString = "";
-	var i,d;
-	
-	for (i = 0; i < ViewString.length; i++)
-	{
-		if (ViewString.substring(i,i+1) == '?')
-		{
-			var FieldString = "";
-			for (i++; i < ViewString.length && ViewString.substring(i,i+1) != '?'; i++)
-				FieldString = FieldString + ViewString.substring(i,i+1);
-			NewString = NewString + '0('+APD_GetSingleValue(ParentTableNo,FieldString)+')';
-		}
-		else
-			NewString = NewString + ViewString.substring(i,i+1);
-	}
-	return NewString;
-}
-function APD_FillLines(TableNo,ParentTableNo,ViewString)
-{
-	var i,d;
-	var VS = APD_CreateViewString(ParentTableNo,ViewString);
-	var FirstSearch = true;
-	var MoreRecords = true;
-	//while(1)
-	//document.body.style.cursor = "wait";
-	for (i = 0; i < document.forms.length; i++)
-	{
-		var Form = document.forms[i];
-		var CheckTablePos = Form.name.indexOf(":");
-		var CheckTable = "";
-		if ( CheckTable != -1)
-		{
-			CheckTable = Form.name.slice(0,CheckTablePos);
-			if (CheckTable == TableNo.toString()) 
-			{
-				if (!MoreRecords)
-					Form.reset();
-				else
-				{
-					if (FirstSearch)			
-					{
-						if (!APD_Find(TableNo,'-',VS,document.forms[i].name,document.forms[i].name))
-						{
-							MoreRecords = false;
-							Form.reset();
-						}
-						FirstSearch = false;
-					}
-					else
-						if (!APD_Find(TableNo,'>',VS,document.forms[i - 1].name,document.forms[i].name))
-						{
-							MoreRecords = false;
-							Form.reset();
-						}
-				}
-			}
-		}
-	}
-	//document.body.style.cursor = "default";
-}
-
-function APD_GetValueFromQueryString(Parm)
-{
-    bg = new String(window.location.search.slice(1));
-    split = bg.split("&");
-    getvar = new Object();
-    for(i= 0; i < split.length; i++)
-    {
-        bg = new String(split[i]);
-        vaerdi = bg.split("=");
-        getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
-    }
-    return getvar[Parm];
-}
-
-function APD_ShowError()
-{
-    var msg = new String(APD_GetValueFromQueryString("_ERRORMESSAGE"));
-    msg = msg.replace(/\x2B/g," ");
-    APDAlert(msg);
-}
-
-if (window.location.search.search("_ERRORMESSAGE") != -1)
-    setTimeout(APD_ShowError,1000);
-
-function APD_Insert(entry,table)
-{
-	var data = "";
-	var i,d;    
-    var Rsp;
-	var form = entry;
-    var Message = 0;
-	//document.body.style.cursor = "wait";
-	for (d = 0; d < form.length; d++)
-	{
-		if(form.elements[d].name != null)
-		{
-			if (form.elements[d].name.slice(0,table.toString().length + 1) == table.toString()+':')
-			{
-				if (d > 0)
-						data = data + '&';
-				data = data + form.elements[d].name + '=' + encodeURIComponent(APD_GetValue(form,d));
-			}
-		}
-	}
-	Rsp = ajax_request(RootLocation + '?ajax=insert&Table='+table+'&'+encodeURI(window.location.search.substring(1)),data,true,null);
-    if (Rsp.value.slice(0,5) == 'DATA1')
-    {
-        // The Record comes back
-        //alert(Rsp.value.slice(100));
-        bg = new String(Rsp.value.slice(5));
-        split = bg.split("&");
-        getvar = new Object();
-        for(i= 0; i < split.length; i++)
-        {
-            bg = new String(split[i]);
-            vaerdi = bg.split("=");
-            getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
-            if (vaerdi[0] == "_MESSAGE")
-                Message = 1;
         }
-			for (d = 0; d < form.length; d++)
-			{
-				if (form.elements[d].name != null)
-				{
-				//form.elements[d].value = getvar[form.elements[d].name];
-					if (typeof(getvar[form.elements[d].name]) != 'undefined')
-						APD_SetValue(form,d,getvar[form.elements[d].name]);
-					if (Message == 1)
-					{
-							var msg = getvar["_MESSAGE"];
-							msg = msg.replace(/\x2B/g," "); 
-							APDAlert(msg);
-					}
-				}
-			}
-    }
-    else
-        if (Rsp.value.slice(0,5) == 'ERROR')
-        {
-           APDAlert(Rsp.value.slice(5));
+
+        @media (max-width: 600px) {
+            .hero { padding: 48px 0 40px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .header-inner { flex-direction: column; gap: 12px; }
         }
-        else
-            APDAlert('Unknown NAV Ajax response (#3) ('+Rsp.value+')');
-	//document.body.style.cursor = "default";
-}
+    </style>
+</head>
+<body>
 
-function APD_Modify(entry,table)
-{
-	var data = "";
-	var i,d;    
-    var Rsp;
-	var form = entry;
-    var Message = 0;
-	//document.body.style.cursor = "wait";
-	for (d = 0; d < form.length; d++)
-	{
-		if (form.elements[d].name != null)
-		{
-			if (form.elements[d].name.slice(0,table.toString().length + 1) == table.toString()+':')
-			{
-				if (d > 0)
-						data = data + '&';
-				data = data + form.elements[d].name + '=' + encodeURIComponent(APD_GetValue(form,d));
-			}
-		}
-	}
-	Rsp = ajax_request(RootLocation + '?ajax=modify&Table='+table+'&'+encodeURI(window.location.search.substring(1)),data,true,null);
-    if (Rsp.value.slice(0,5) == 'DATA1')
-    {
-        // The Record comes back
-        //alert(Rsp.value.slice(100));
-        bg = new String(Rsp.value.slice(5));
-        split = bg.split("&");
-        getvar = new Object();
-        for(i= 0; i < split.length; i++)
-        {
-            bg = new String(split[i]);
-            vaerdi = bg.split("=");
-            getvar[vaerdi[0]] = decodeURIComponent(vaerdi[1]);
-            if (vaerdi[0] == "_MESSAGE")
-                Message = 1;
-        }
-				for (d = 0; d < form.length; d++)
-				{
-					//form.elements[d].value = getvar[form.elements[d].name];
-					if (form.elements[d].name != null)
-					{
-						if (typeof(getvar[form.elements[d].name]) != 'undefined')
-						APD_SetValue(form,d,getvar[form.elements[d].name]);
-						if (Message == 1)
-						{
-								var msg = getvar["_MESSAGE"];
-								msg = msg.replace(/\x2B/g," "); 
-								APDAlert(msg);
-						}
-					}
-				}
-    }
-    else
-        if (Rsp.value.slice(0,5) == 'ERROR')
-        {
-           APDAlert(Rsp.value.slice(5));
-        }
-        else
-            APDAlert('Unknown NAV Ajax response (#4) ('+Rsp.value+')');
-	//document.body.style.cursor = "default";
-}
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
 
-// Lookup fields!
-function APD_Lookup(TableNo,FieldNo,LookupTableNo,LookupFieldNo,DescriptionFieldNo,entry)
-{
-    window.self.name='APD';
-	var data = '';
-	var form;
-	var node = entry;
-	while (node.form == null && node.parentNode) 
-	{
-    	node = node.parentNode;
-	}
-    if (node.form != null)
-    {
-	  form = node.form;
-		for (d = 0; d < form.length; d++)
-		{
-			if (form.elements[d].name != null)
-			{
-				if (form.elements[d].name.slice(0,TableNo.toString().length + 1) == TableNo.toString()+':')
-				{
-					if (d > 0)
-							data = data + '&';
-					data = data + form.elements[d].name + '=' + encodeURIComponent(APD_GetValue(form,d));
-				}
-			}
-		}
-	}
-    LookupWindow=window.open("?action=lookup&_WINDOW="+window.self.name+
-                                      "&_PTABLE="+TableNo.toString()+
-                                      "&_PFIELD="+FieldNo.toString()+
-                                      "&_TABLE="+LookupTableNo.toString()+
-                                      "&_FIELD="+LookupFieldNo.toString()+
-                                      "&_FIELD2="+DescriptionFieldNo.toString()+
-									  "&"+data.toString()
-                                      ,
-                          "APDSELECT", 'dependent,scrollbars=no,width=500,height=430,innerheight=430,innerwidth=500');     
-    LookupWindow.focus();	
- }
+<div class="container">
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon"><img style="height:42px;" src="https://www.hougaard.com/wp-content/uploads/elementor/thumbs/Logo-qpt1gas0mstrzo358xl5gqd2m437e18nqx82uj26ak.png"></div>
+                <div class="logo-text">Advanced Portal Designer <span>for Business Central</span></div>
+            </div>
+            <div class="badge-bc">? Ready to Build</div>
+        </div>
+    </header>
 
-function APD_LookupReturn(Value)
-{
-	var ptable = APD_GetValueFromQueryString("_PTABLE");
-	var pfield = APD_GetValueFromQueryString("_PFIELD");
-	var pwin = window.opener;
-    var attr;
-    var w,i,d,a;
-    self.blur()
-    for (w = 0; w < pwin.document.forms.length; w++)
-        for (i = 0; i < pwin.document.forms[w].length; i++)
-					if (pwin.document.forms[w].elements[i].name != null)
-					{
-            if (pwin.document.forms[w].elements[i].name == ptable.toString()+":"+pfield.toString())
-            {
-                d = i;        
-                xRecValue = pwin.document.forms[w].elements[d].value;
-                APD_SetValue(pwin.document.forms[w],d,Value);
-                attr = pwin.document.forms[w].elements[d].attributes;
-                for (a = 0; a < attr.length; a++)
-                {
-                    if (attr[a].name == "onchange")
-					  if (attr[a].value.toString() != "null")
-                        if (attr[a].value.toString().slice(0,8) == 'Navision')
-                            APD_validate(pwin.document.forms[w].elements[d],ptable,pfield);
-                }
-                self.close();
-                return;
-            }
-					}
-    self.close();
-}
+    <section class="hero">
+        <div class="hero-badge">Your portal journey starts now</div>
+        <h1>
+            Build something<br>
+            <span class="gradient-text">extraordinary.</span>
+        </h1>
+        <p>
+            You've just unlocked the most powerful portal framework for Business Central. 
+            Design customer portals, vendor dashboards, and public-facing sites — all connected 
+            live to your BC data.
+        </p>
+        <?auth()?>
+        <p>
+            <?open("APD User Hgd")?>
+            <?filter("apd user hgd","User ID",user())?>
+            Logged in as <?field("apd user hgd",Name)?>
+            <?close("apd user hgd")?>
+        </p>
+        <?endif?>
+        <div class="hero-actions">
+            <a href="https://support.hougaard.com/portal/?action=DOC.APD" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                Read the Documentation
+            </a>
+            <a href="https://www.youtube.com/playlist?list=PLnldREWlGR0v6d70atvgZZS2iSejHDnle" class="btn btn-secondary" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                Watch Tutorials
+            </a>
+        </div>
+    </section>
 
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon purple">&#9829;</div>
+                <h3>Live Business Central Data</h3>
+                <p>Your portal reads and writes directly to BC tables in real-time. No sync delays, no middleware — just pure, live connectivity to customers, items, orders, and every table you need.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">&#9829;</div>
+                <h3>Full Creative Control</h3>
+                <p>Use standard HTML and CSS enhanced with powerful APD tags. Build anything from a simple customer lookup to a complete self-service portal with dashboards, forms, and file uploads.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon rose">&#9829;</div>
+                <h3>Security Built In</h3>
+                <p>User authentication, security profiles, and per-user data filtering come standard. Integrate with Auth0, control access with profiles, and let each user see only their own data.</p>
+            </div>
+        </div>
+    </section>
 
-function APD_Press_Key(e)
-{
-    if (e == null)
-    {
-        // Internet Explorer
-        if (event.keyCode == 27)
-            event.returnValue = false;            
-    }
-    else
-    {
-        // Netscape
-        if (e.charCode == 27)
-            e.preventDefault();
-    }
-}
+    <div class="divider">
+        <div class="divider-line"></div>
+        <h2>Up and running in four steps</h2>
+        <p>From a blank canvas to a live portal — it's simpler than you think.</p>
+    </div>
 
-function APD_UseDatePicker(control)
-{
-  __dialog = new mdDateTimePicker.default({type: 'date',past: moment(),future: moment().add(10, 'years') });
-  __dialogowner = control;
-  __dialog.trigger = __dialogowner;
-  try{
-  __dialogowner.removeEventListener('onOk',datepicker_onOk);
-  } catch(Err) {}
-  __dialogowner.addEventListener('onOk',datepicker_onOk);
-  __dialog.toggle();
-}
-function datepicker_onOk()
-{
-  	__dialogowner.value = __dialog.time.format('MM/DD/YY');
-}
+    <section class="steps">
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-number"></div>
+                <h4>Create an Action</h4>
+                <p>Actions are your pages. Create one in the APD setup inside Business Central.</p>
+            </div>
+            <div class="step">
+                <div class="step-number"></div>
+                <h4>Design a Template</h4>
+                <p>Write HTML with APD tags to pull fields, loop records, and build your UI.</p>
+            </div>
+            <div class="step">
+                <div class="step-number"></div>
+                <h4>Connect Your Data</h4>
+                <p>Open BC tables, apply filters, and display exactly the data your users need.</p>
+            </div>
+            <div class="step">
+                <div class="step-number"></div>
+                <h4>Go Live</h4>
+                <p>Compile, set as default, and share the link. Your portal is live.</p>
+            </div>
+        </div>
+    </section>
 
-function APD_Set(key,value)
-{
-    Rsp = ajax_request(RootLocation + '?ajax=setvalue&key=' + encodeURIComponent(key) + '&value=' + encodeURIComponent(value));
-    if (Rsp.value.slice(0,7) == 'DATA1OK')
-        return true;
-    return false;
-}
+    <footer>
+        <p>Advanced Portal Designer by <a href="https://www.hougaard.com" target="_blank">Hougaard.com</a>&ensp;·&ensp;<a href="https://support.hougaard.com/portal/?action=DOC.APD">Documentation</a>&ensp;·&ensp;<a href="https://www.youtube.com/playlist?list=PLnldREWlGR0v6d70atvgZZS2iSejHDnle" target="_blank">YouTube</a></p>
+    </footer>
+</div>
 
-function APD_Get(key)
-{
-    Rsp = ajax_request(RootLocation + '?ajax=getvalue&key=' + encodeURIComponent(key));
-    if (Rsp.value.slice(0,5) == 'DATA1')
-        return Rsp.value.slice(5);
-    return null;
-}
-function APD_Has(key)
-{
-    Rsp = ajax_request(RootLocation + '?ajax=getvalue&key=' + encodeURIComponent(key));
-    if (Rsp.value.slice(0,5) == 'DATA1')
-        return true;
-    return false;
-}
- 
-
-document.onkeydown= APD_Press_Key;
-
+</body>
+</html>

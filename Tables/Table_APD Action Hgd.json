@@ -156,7 +156,7 @@
         "value": ""
       },
       "F100": {
-        "value": "login"
+        "value": "login.html"
       },
       "F200": {
         "value": ""
@@ -352,7 +352,7 @@
         "value": ""
       },
       "F100": {
-        "value": "welcome"
+        "value": "welcome.html"
       },
       "F200": {
         "value": ""
